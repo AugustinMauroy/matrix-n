@@ -2,8 +2,8 @@
 
 A JavaScript library for matrix operations, including addition, multiplication, and inversion. It supports matrices of any size and provides a simple API for common operations.
 
-[![npm version](https://img.shields.io/npm/v/@augustinmauroy/vec3.svg)](https://www.npmjs.com/package/@augustinmauroy/vec3)
-[![JSR](https://jsr.io/badges/@augustinmauroy/vec3)](https://jsr.io/@augustinmauroy/vec3)
+[![npm version](https://img.shields.io/npm/v/@augustinmauroy/matrix-n.svg)](https://www.npmjs.com/package/@augustinmauroy/matrix-n)
+[![JSR](https://jsr.io/badges/@augustinmauroy/matrix-n)](https://jsr.io/@augustinmauroy/matrix-n)
 
 > **NOTE** This package is tested with [Node.js](https://nodejs.org/en/) but the package din't use any Node.js specific feature. It should work in any JavaScript environment (browser, Deno, etc.). If you encounter any issue, please open an issue on [GitHub](https://github.com/AugustinMauroy/matrix-n/issues).
 
