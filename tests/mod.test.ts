@@ -167,12 +167,10 @@ describe("MatrixN Core Functionality", { concurrency: true }, () => {
 describe("MatrixN Operations", () => {
 	let m1: MatrixN;
 	let m2: MatrixN;
-	let mIdent2: MatrixN;
 
 	beforeEach(() => {
 		m1 = new MatrixN(2, 2, [1, 2, 3, 4]);
 		m2 = new MatrixN(2, 2, [5, 6, 7, 8]);
-		mIdent2 = MatrixN.identity(2);
 	});
 
 	it("add should perform element-wise addition", () => {
