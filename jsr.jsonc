@@ -1,0 +1,21 @@
+{
+  "$schema": "https://jsr.io/schema/config-file.v1.json",
+  "version": "1.0.0",
+  "name": "@augustinmauroy/matrix-n",
+  "description": "A JavaScript library for matrix operations, including addition, multiplication, and inversion. It supports matrices of any size and provides a simple API for common operations.",
+  "exports": "./dist/mod.js",
+  "license": "MIT",
+  "publish": {
+    "include": [
+      "README.md",
+      "LICENSE",
+      "dist/**/*.js",
+      "dist/**/*.d.ts",
+      "dist/**/*.map"
+    ],
+    // https://jsr.io/docs/publishing-packages#un-gitignoring-files-when-not-using-include
+    "exclude": [
+      "!dist"
+    ]
+  }
+}
