@@ -26,6 +26,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AugustinMauroy/vec3.git"
+    "url": "git+https://github.com/AugustinMauroy/matrix-n.git"
   }
 }
