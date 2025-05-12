@@ -5,7 +5,11 @@ A JavaScript library for matrix operations, including addition, multiplication, 
 [![npm version](https://img.shields.io/npm/v/@augustinmauroy/vec3.svg)](https://www.npmjs.com/package/@augustinmauroy/vec3)
 [![JSR](https://jsr.io/badges/@augustinmauroy/vec3)](https://jsr.io/@augustinmauroy/vec3)
 
-> **NOTE** This package is tested with [Node.js](https://nodejs.org/en/) but the package din't use any Node.js specific feature. It should work in any JavaScript environment (browser, Deno, etc.). If you encounter any issue, please open an issue on [GitHub](https://github.com/AugustinMauroy/vec3/issues).
+> **NOTE** This package is tested with [Node.js](https://nodejs.org/en/) but the package din't use any Node.js specific feature. It should work in any JavaScript environment (browser, Deno, etc.). If you encounter any issue, please open an issue on [GitHub](https://github.com/AugustinMauroy/matrix-n/issues).
+
+> [!NOTE]
+> This lib is in `0.x.x` version. The API is not definitive and may change in the future. Your feedback is welcome!
+> Please open an issue on [GitHub](https://github.com/AugustinMauroy/matrix-n/issues) if you have any suggestion or if you encounter any issue.
 
 ## Example
 
