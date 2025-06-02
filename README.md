@@ -4,6 +4,7 @@ A JavaScript library for matrix operations, including addition, multiplication, 
 
 [![npm version](https://img.shields.io/npm/v/@augustinmauroy/matrix-n.svg)](https://www.npmjs.com/package/@augustinmauroy/matrix-n)
 [![JSR](https://jsr.io/badges/@augustinmauroy/matrix-n)](https://jsr.io/@augustinmauroy/matrix-n)
+[![codecov](https://codecov.io/gh/AugustinMauroy/matrix-n/graph/badge.svg?token=MZVSB35XDG)](https://codecov.io/gh/AugustinMauroy/matrix-n)
 
 > **NOTE** This package is tested with [Node.js](https://nodejs.org/en/) but the package din't use any Node.js specific feature. It should work in any JavaScript environment (browser, Deno, etc.). If you encounter any issue, please open an issue on [GitHub](https://github.com/AugustinMauroy/matrix-n/issues).
 
