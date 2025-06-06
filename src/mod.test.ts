@@ -4,7 +4,7 @@ import { MatrixN, Mat2, Mat3, Mat4 } from "../src/mod.ts";
 
 const EPSILON = 1e-5; // Epsilon for floating point comparisons
 
-describe("MatrixN Core Functionality", { concurrency: true }, () => {
+describe("MatrixN Core Functionality", () => {
 	it("should construct with dimensions and initialize with zeros", () => {
 		const mat = new MatrixN(2, 3);
 
@@ -17,6 +17,13 @@ describe("MatrixN Core Functionality", { concurrency: true }, () => {
 		const mat = new MatrixN(2, 2, [1, 2, 3, 4]);
 
 		assert.deepStrictEqual(Array.from(mat.elements), [1, 2, 3, 4]);
+	});
+
+	it('should trhow error when "Initial data dimensions do not match matrix dimensions”', () => {
+		assert.throws(
+			() => new MatrixN(2, 4, [1, 2, 3]),
+			/Initial flat data length does not match matrix dimensions/,
+		);
 	});
 
 	it("should construct with 2D initial data", () => {
@@ -56,15 +63,20 @@ describe("MatrixN Core Functionality", { concurrency: true }, () => {
 				]),
 			/Initial data dimensions do not match/,
 		);
+		assert.throws(
+			// @ts-expect-error testing invalid type
+			() => new MatrixN(2, 2, [[1, 2], "not an array"]),
+			/Initial data dimensions do not match matrix dimensions/,
+		);
 	});
 
-	it("should throw error when initial data dimensions do not match matrix dimensions", () => {
+	it("should throw error when 2D initialData has incorrect number of rows", () => {
 		assert.throws(
-			() => new MatrixN(2, 3, [1, 2, 3]),
-			/Initial flat data length does not match matrix dimensions/,
-		);
-		assert.throws(
-			() => new MatrixN(2, 2, [[1, 2], [3]]),
+			() =>
+				new MatrixN(1, 2, [
+					[1, 2],
+					[3, 4],
+				]), // rows=1, but data has 2 rows
 			/Initial data dimensions do not match matrix dimensions/,
 		);
 	});
@@ -167,10 +179,12 @@ describe("MatrixN Core Functionality", { concurrency: true }, () => {
 describe("MatrixN Operations", () => {
 	let m1: MatrixN;
 	let m2: MatrixN;
+	let m3: MatrixN;
 
 	beforeEach(() => {
 		m1 = new MatrixN(2, 2, [1, 2, 3, 4]);
 		m2 = new MatrixN(2, 2, [5, 6, 7, 8]);
+		m3 = new MatrixN(2, 3, [1, 2, 3, 4, 5, 6]); // For incompatible dimension tests
 	});
 
 	it("add should perform element-wise addition", () => {
@@ -183,6 +197,10 @@ describe("MatrixN Operations", () => {
 		m1.addSelf(m2);
 
 		assert.deepStrictEqual(Array.from(m1.elements), [6, 8, 10, 12]);
+		assert.throws(
+			() => m1.addSelf(m3),
+			/Matrices must have the same dimensions for addition/,
+		);
 	});
 
 	it("subtract should perform element-wise subtraction", () => {
@@ -201,6 +219,10 @@ describe("MatrixN Operations", () => {
 		assert.throws(
 			() => m1.subtract(incompatible),
 			/Matrices must have the same dimensions/,
+		);
+		assert.throws(
+			() => m1.addSelf(incompatible), // Added this case
+			/Matrices must have the same dimensions for addition/,
 		);
 	});
 
@@ -328,6 +350,34 @@ describe("MatrixN Operations", () => {
 
 		const mInv = m.invert();
 
+		assert.ok(m.multiply(mInv).equals(MatrixN.identity(4), EPSILON));
+	});
+
+	it("invert should work for a generic 4x4 matrix", () => {
+		// Matrix from determinant test, det = 24
+		const m4 = new Mat4([3, 2, 0, 1, 4, 0, 1, 2, 3, 0, 2, 1, 9, 2, 3, 1]);
+		const m4Inv = m4.invert();
+		assert.ok(
+			m4.multiply(m4Inv).equals(MatrixN.identity(4), EPSILON),
+			"M * M^-1 should be Identity",
+		);
+
+		// Another example
+		const m = new MatrixN(
+			4,
+			4,
+			[2, 0, 0, 0, 0, 4, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1],
+		);
+		const expectedInv = new MatrixN(
+			4,
+			4,
+			[0.5, 0, 0, 0, 0, 0.25, 0, 0, 0, 0, 1, -1, 0, 0, 0, 1],
+		);
+		const mInv = m.invert();
+		assert.ok(
+			mInv.equals(expectedInv, EPSILON),
+			"Inverse of diagonal-like matrix",
+		);
 		assert.ok(m.multiply(mInv).equals(MatrixN.identity(4), EPSILON));
 	});
 });
@@ -470,6 +520,24 @@ describe("Fixed Size Matrices (Mat2, Mat3, Mat4)", () => {
 			() => new Mat2([[1, 2], [3]]),
 			/Mat2 initial data must be 2x2/,
 		);
+		assert.throws(
+			() => new Mat2([[1, 2]]), // Incorrect number of rows
+			/Mat2 initial data must be 2x2/,
+		);
+		assert.throws(
+			() =>
+				new Mat2([
+					[1, 2],
+					[3, 4],
+					[5, 6],
+				]), // Incorrect number of rows
+			/Mat2 initial data must be 2x2/,
+		);
+		assert.throws(
+			// @ts-expect-error testing invalid type
+			() => new Mat2([[1, 2], "not an array"]), // Inner element not an array
+			/Mat2 initial data must be 2x2/,
+		);
 	});
 
 	it("Mat3 should construct correctly", () => {
@@ -489,6 +557,24 @@ describe("Fixed Size Matrices (Mat2, Mat3, Mat4)", () => {
 		assert.throws(
 			() => new Mat3([1, 2, 3]),
 			/Mat3 initial flat data must have 9 elements/,
+		);
+		assert.throws(
+			() => new Mat3([[1, 2, 3]]), // Incorrect number of rows
+			/Mat3 initial data must be 3x3/,
+		);
+		assert.throws(
+			// @ts-expect-error testing invalid type
+			() => new Mat3([[1, 2, 3], [4, 5, 6], "not an array"]), // Inner element not an array
+			/Mat3 initial data must be 3x3/,
+		);
+		assert.throws(
+			() =>
+				new Mat3([
+					[1, 2, 3],
+					[4, 5],
+					[7, 8, 9],
+				]), // Inner array wrong length
+			/Mat3 initial data must be 3x3/,
 		);
 	});
 
@@ -527,6 +613,25 @@ describe("Fixed Size Matrices (Mat2, Mat3, Mat4)", () => {
 		assert.throws(
 			() => new Mat4([1, 2, 3]),
 			/Mat4 initial flat data must have 16 elements/,
+		);
+		assert.throws(
+			() => new Mat4([[1, 2, 3, 4]]), // Incorrect number of rows
+			/Mat4 initial data must be 4x4/,
+		);
+		assert.throws(
+			// @ts-expect-error testing invalid type
+			() => new Mat4([[1, 2, 3, 4], [5, 6, 7, 8], "not an array"]), // Inner element not an array
+			/Mat4 initial data must be 4x4/,
+		);
+		assert.throws(
+			() =>
+				new Mat4([
+					[1, 2, 3, 4],
+					[5, 6, 7],
+					[9, 10, 11, 12],
+					[13, 14, 15, 16],
+				]), // Inner array wrong length
+			/Mat4 initial data must be 4x4/,
 		);
 	});
 

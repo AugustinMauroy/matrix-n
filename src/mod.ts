@@ -351,9 +351,6 @@ export class MatrixN {
 			}
 			return det;
 		}
-		throw new Error(
-			`Determinant calculation for ${n}x${n} matrices not implemented in this basic version.`,
-		);
 	}
 
 	/**
@@ -443,10 +440,6 @@ export class MatrixN {
 			}
 			return adj.multiplyScalar(invDet);
 		}
-
-		throw new Error(
-			`Inversion for ${n}x${n} matrices not implemented in this basic version.`,
-		);
 	}
 
 	/**
