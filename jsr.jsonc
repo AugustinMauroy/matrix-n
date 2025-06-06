@@ -1,6 +1,6 @@
 {
   "$schema": "https://jsr.io/schema/config-file.v1.json",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "name": "@augustinmauroy/matrix-n",
   "description": "A JavaScript library for matrix operations, including addition, multiplication, and inversion. It supports matrices of any size and provides a simple API for common operations.",
   "exports": "./dist/mod.js",
