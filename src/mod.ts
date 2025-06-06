@@ -341,7 +341,6 @@ export class MatrixN {
 				"Determinant calculation for N > 3 is not fully implemented in this basic version and may be incorrect or slow. Using cofactor expansion.",
 			);
 			let det = 0;
-			if (n === 0) return 1; // Or throw error
 
 			for (let j = 0; j < n; j++) {
 				det +=
