@@ -307,6 +307,37 @@ export class MatrixN {
 	}
 
 	/**
+	 * Performs an LU decomposition of this matrix (n > 3) using Crout's method.
+	 * Returns { L, U } where L and U are lower and upper triangular matrices.
+	 */
+	private luDecomposition(): { L: MatrixN; U: MatrixN } {
+		const n = this.rows;
+		const L = MatrixN.identity(n);
+		const U = MatrixN.zeros(n, n);
+		for (let j = 0; j < n; j++) {
+			for (let i = 0; i < n; i++) {
+				let sum = 0;
+				if (i <= j) {
+					for (let k = 0; k < i; k++) {
+						sum += L.getElement(i, k) * U.getElement(k, j);
+					}
+					U.setElement(i, j, this.getElement(i, j) - sum);
+				} else {
+					for (let k = 0; k < j; k++) {
+						sum += L.getElement(i, k) * U.getElement(k, j);
+					}
+					L.setElement(
+						i,
+						j,
+						(this.getElement(i, j) - sum) / U.getElement(j, j),
+					);
+				}
+			}
+		}
+		return { L, U };
+	}
+
+	/**
 	 * Calculates the determinant of this matrix.
 	 * Only implemented for 1x1, 2x2, and 3x3 matrices for this example.
 	 * For larger matrices, a more general algorithm (e.g., LU decomposition) is needed.
@@ -318,38 +349,34 @@ export class MatrixN {
 				"Determinant can only be calculated for square matrices.",
 			);
 		}
+
 		const n = this.rows;
-		const m = this.elements;
 
 		if (n === 1) {
-			return m[0];
+			return this.elements[0];
 		}
+
 		if (n === 2) {
+			const m = this.elements;
 			return m[0] * m[3] - m[1] * m[2];
 		}
+
 		if (n === 3) {
+			const m = this.elements;
 			return (
 				m[0] * (m[4] * m[8] - m[5] * m[7]) -
 				m[1] * (m[3] * m[8] - m[5] * m[6]) +
 				m[2] * (m[3] * m[7] - m[4] * m[6])
 			);
 		}
-		// For n > 3, a more general algorithm like cofactor expansion or LU decomposition is needed.
-		// This is a placeholder and not a general solution for n > 3.
-		if (n > 3) {
-			console.warn(
-				"Determinant calculation for N > 3 is not fully implemented in this basic version and may be incorrect or slow. Using cofactor expansion.",
-			);
-			let det = 0;
 
-			for (let j = 0; j < n; j++) {
-				det +=
-					(j % 2 === 1 ? -1 : 1) *
-					this.getElement(0, j) *
-					this.minor(0, j).determinant();
-			}
-			return det;
+		// For larger matrices, use LU decomposition
+		const { L, U } = this.luDecomposition();
+		let det = 1;
+		for (let i = 0; i < n; i++) {
+			det *= U.getElement(i, i);
 		}
+		return det;
 	}
 
 	/**
@@ -386,59 +413,70 @@ export class MatrixN {
 			throw new Error("Only square matrices can be inverted.");
 		}
 		const n = this.rows;
-		const det = this.determinant();
+		if (n <= 3) {
+			const det = this.determinant();
 
-		if (Math.abs(det) < 1e-10) {
-			// Using a small epsilon for float comparison
-			throw new Error(
-				"Matrix is singular and cannot be inverted (determinant is zero).",
-			);
-		}
-
-		const m = this.elements;
-		const invDet = 1 / det;
-
-		if (n === 1) {
-			return new MatrixN(1, 1, [invDet * m[0]]);
-		}
-
-		if (n === 2) {
-			const result = new MatrixN(2, 2);
-			result.elements[0] = m[3] * invDet;
-			result.elements[1] = -m[1] * invDet;
-			result.elements[2] = -m[2] * invDet;
-			result.elements[3] = m[0] * invDet;
-			return result;
-		}
-
-		if (n === 3) {
-			const result = new MatrixN(3, 3);
-			result.elements[0] = (m[4] * m[8] - m[5] * m[7]) * invDet;
-			result.elements[1] = (m[2] * m[7] - m[1] * m[8]) * invDet;
-			result.elements[2] = (m[1] * m[5] - m[2] * m[4]) * invDet;
-			result.elements[3] = (m[5] * m[6] - m[3] * m[8]) * invDet;
-			result.elements[4] = (m[0] * m[8] - m[2] * m[6]) * invDet;
-			result.elements[5] = (m[2] * m[3] - m[0] * m[5]) * invDet;
-			result.elements[6] = (m[3] * m[7] - m[4] * m[6]) * invDet;
-			result.elements[7] = (m[1] * m[6] - m[0] * m[7]) * invDet;
-			result.elements[8] = (m[0] * m[4] - m[1] * m[3]) * invDet;
-			return result;
-		}
-
-		// Adjoint method for general N
-		if (n > 3) {
-			console.warn(
-				"Inversion for N > 3 is not fully implemented in this basic version and may be incorrect or slow. Using Adjoint method.",
-			);
-			const adj = MatrixN.zeros(n, n);
-			for (let i = 0; i < n; i++) {
-				for (let j = 0; j < n; j++) {
-					const sign = (i + j) % 2 === 0 ? 1 : -1;
-					adj.setElement(j, i, sign * this.minor(i, j).determinant()); // Note transpose for adjugate
-				}
+			if (Math.abs(det) < 1e-10) {
+				// Using a small epsilon for float comparison
+				throw new Error(
+					"Matrix is singular and cannot be inverted (determinant is zero).",
+				);
 			}
-			return adj.multiplyScalar(invDet);
+
+			const m = this.elements;
+			const invDet = 1 / det;
+
+			if (n === 1) {
+				return new MatrixN(1, 1, [invDet * m[0]]);
+			}
+
+			if (n === 2) {
+				const result = new MatrixN(2, 2);
+				result.elements[0] = m[3] * invDet;
+				result.elements[1] = -m[1] * invDet;
+				result.elements[2] = -m[2] * invDet;
+				result.elements[3] = m[0] * invDet;
+				return result;
+			}
+
+			if (n === 3) {
+				const result = new MatrixN(3, 3);
+				result.elements[0] = (m[4] * m[8] - m[5] * m[7]) * invDet;
+				result.elements[1] = (m[2] * m[7] - m[1] * m[8]) * invDet;
+				result.elements[2] = (m[1] * m[5] - m[2] * m[4]) * invDet;
+				result.elements[3] = (m[5] * m[6] - m[3] * m[8]) * invDet;
+				result.elements[4] = (m[0] * m[8] - m[2] * m[6]) * invDet;
+				result.elements[5] = (m[2] * m[3] - m[0] * m[5]) * invDet;
+				result.elements[6] = (m[3] * m[7] - m[4] * m[6]) * invDet;
+				result.elements[7] = (m[1] * m[6] - m[0] * m[7]) * invDet;
+				result.elements[8] = (m[0] * m[4] - m[1] * m[3]) * invDet;
+				return result;
+			}
 		}
+
+		// Inversion by LU for n > 3
+		const { L, U } = this.luDecomposition();
+		// Forward and backward substitutions to find inverse
+		const inv = MatrixN.identity(n);
+		for (let col = 0; col < n; col++) {
+			// Solve L * y = e (where e is a unit vector) for y
+			for (let i = 0; i < n; i++) {
+				let sum = inv.getElement(i, col);
+				for (let k = 0; k < i; k++) {
+					sum -= L.getElement(i, k) * inv.getElement(k, col);
+				}
+				inv.setElement(i, col, sum / L.getElement(i, i));
+			}
+			// Solve U * x = y for x
+			for (let i = n - 1; i >= 0; i--) {
+				let sum = inv.getElement(i, col);
+				for (let k = i + 1; k < n; k++) {
+					sum -= U.getElement(i, k) * inv.getElement(k, col);
+				}
+				inv.setElement(i, col, sum / U.getElement(i, i));
+			}
+		}
+		return inv;
 	}
 
 	/**
@@ -457,6 +495,68 @@ export class MatrixN {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Returns the rank of this matrix.
+	 * Uses Gaussian elimination with partial pivoting.
+	 * @returns The rank of the matrix.
+	 */
+	public rank(): number {
+		const copy = this.clone(); // Avoid modifying the original
+		const rows = copy.rows;
+		const cols = copy.cols;
+		let rank = 0;
+		let row = 0;
+
+		for (let col = 0; col < cols && row < rows; col++) {
+			// Partial pivot: find pivot row
+			let pivot = row;
+			for (let r = row + 1; r < rows; r++) {
+				if (
+					Math.abs(copy.getElement(r, col)) >
+					Math.abs(copy.getElement(pivot, col))
+				) {
+					pivot = r;
+				}
+			}
+			// If pivot is nearly zero, move on to next column
+			if (Math.abs(copy.getElement(pivot, col)) < 1e-12) {
+				continue;
+			}
+
+			// Swap pivot row if needed
+			if (pivot !== row) {
+				for (let c = 0; c < cols; c++) {
+					const temp = copy.getElement(row, c);
+					copy.setElement(row, c, copy.getElement(pivot, c));
+					copy.setElement(pivot, c, temp);
+				}
+			}
+
+			// Normalize pivot row
+			const pivotVal = copy.getElement(row, col);
+			for (let c = col; c < cols; c++) {
+				copy.setElement(row, c, copy.getElement(row, c) / pivotVal);
+			}
+
+			// Eliminate below
+			for (let r = row + 1; r < rows; r++) {
+				const factor = copy.getElement(r, col);
+				for (let c = col; c < cols; c++) {
+					copy.setElement(
+						r,
+						c,
+						copy.getElement(r, c) - factor * copy.getElement(row, c),
+					);
+				}
+			}
+
+			row++;
+			rank++;
+		}
+
+		return rank;
 	}
 
 	/**
@@ -601,9 +701,6 @@ export class Mat2 extends MatrixN {
 	static identity(): Mat2 {
 		return new Mat2([1, 0, 0, 1]);
 	}
-	// Override methods like determinant, invert for specific 2x2 optimizations if needed
-	// determinant(): number { ... }
-	// invert(): Mat2 { ... }
 }
 
 /**
@@ -650,7 +747,6 @@ export class Mat3 extends MatrixN {
 	static identity(): Mat3 {
 		return new Mat3([1, 0, 0, 0, 1, 0, 0, 0, 1]);
 	}
-	// Override methods for specific 3x3 optimizations
 }
 
 /**
@@ -720,8 +816,4 @@ export class Mat4 extends MatrixN {
 	static identity(): Mat4 {
 		return new Mat4([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
 	}
-	// Override methods for specific 4x4 optimizations.
-	// Note: Determinant and Invert for 4x4 are more complex and are often
-	// implemented with specific optimized algorithms rather than generic cofactor expansion.
-	// The MatrixN versions will be used if not overridden.
 }
