@@ -4,7 +4,7 @@ import { MatrixN, Mat2, Mat3, Mat4 } from "../src/mod.ts";
 
 const EPSILON = 1e-5; // Epsilon for floating point comparisons
 
-describe("MatrixN Core Functionality", { concurrency: true }, () => {
+describe("MatrixN Core Functionality", () => {
 	it("should construct with dimensions and initialize with zeros", () => {
 		const mat = new MatrixN(2, 3);
 
