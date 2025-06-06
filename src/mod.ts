@@ -326,7 +326,11 @@ export class MatrixN {
 					for (let k = 0; k < j; k++) {
 						sum += L.getElement(i, k) * U.getElement(k, j);
 					}
-					L.setElement(i, j, (this.getElement(i, j) - sum) / U.getElement(j, j));
+					L.setElement(
+						i,
+						j,
+						(this.getElement(i, j) - sum) / U.getElement(j, j),
+					);
 				}
 			}
 		}
@@ -509,7 +513,10 @@ export class MatrixN {
 			// Partial pivot: find pivot row
 			let pivot = row;
 			for (let r = row + 1; r < rows; r++) {
-				if (Math.abs(copy.getElement(r, col)) > Math.abs(copy.getElement(pivot, col))) {
+				if (
+					Math.abs(copy.getElement(r, col)) >
+					Math.abs(copy.getElement(pivot, col))
+				) {
 					pivot = r;
 				}
 			}
@@ -537,7 +544,11 @@ export class MatrixN {
 			for (let r = row + 1; r < rows; r++) {
 				const factor = copy.getElement(r, col);
 				for (let c = col; c < cols; c++) {
-					copy.setElement(r, c, copy.getElement(r, c) - factor * copy.getElement(row, c));
+					copy.setElement(
+						r,
+						c,
+						copy.getElement(r, c) - factor * copy.getElement(row, c),
+					);
 				}
 			}
 
