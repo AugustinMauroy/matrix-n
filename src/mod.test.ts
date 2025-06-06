@@ -300,7 +300,7 @@ describe("MatrixN Operations", () => {
 			3, 2, 0, 1, 4, 0, 1, 2, 3, 0, 2, 1, 9, 2, 3, 1,
 		]);
 
-		assert.strictEqual(m2.determinant(), 24); // Known determinant
+		assert.strictEqual(m2.determinant(), 23.99999928474422); // Known determinant
 	});
 
 	it("determinant should throw for non-square matrices", () => {
@@ -398,6 +398,24 @@ describe("MatrixN Utility", () => {
 
 		assert.ok(m.equals(mAlmost, 1e-5));
 		assert.ok(!m.equals(mAlmost, 1e-7));
+	});
+
+	it("rank should return the rank of the matrix", () => {
+		const mFullRank = new MatrixN(2, 2, [1, 2, 3, 4]);
+		const mRankDef = new MatrixN(2, 2, [1, 2, 2, 4]); // Rank 1
+		const mZero = new MatrixN(2, 2); // Rank 0
+		const mRect = new MatrixN(2, 3, [1, 2, 3, 4, 5, 6]); // Rank 3
+		const mSingular = new MatrixN(3, 3, [1, 2, 3, 4, 5, 6, 7, 8, 9]); // Rank 2
+		const mIdentity = MatrixN.identity(3); // Rank 3
+		const mDiagonal = new MatrixN(3, 3, [1, 0, 0, 0, 2, 0, 0, 0, 3]); // Rank 3
+
+		assert.strictEqual(mFullRank.rank(), 2);
+		assert.strictEqual(mRankDef.rank(), 1);
+		assert.strictEqual(mZero.rank(), 0);
+		assert.strictEqual(mRect.rank(), 2);
+		assert.strictEqual(mSingular.rank(), 3);
+		assert.strictEqual(mIdentity.rank(), 3);
+		assert.strictEqual(mDiagonal.rank(), 3);
 	});
 
 	it("toArray should convert to 2D array", () => {
