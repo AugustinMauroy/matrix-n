@@ -1,6 +1,6 @@
 import { describe, it, beforeEach } from "node:test";
 import assert from "node:assert/strict";
-import { MatrixN, Mat2, Mat3, Mat4 } from "../src/mod.ts";
+import { MatrixN, Mat2, Mat3, Mat4 } from "../src/mod.js";
 
 const EPSILON = 1e-5; // Epsilon for floating point comparisons
 
@@ -177,9 +177,9 @@ describe("MatrixN Core Functionality", () => {
 });
 
 describe("MatrixN Operations", () => {
-	let m1: MatrixN;
-	let m2: MatrixN;
-	let m3: MatrixN;
+	let m1//: MatrixN;
+	let m2//: MatrixN;
+	let m3//: MatrixN;
 
 	beforeEach(() => {
 		m1 = new MatrixN(2, 2, [1, 2, 3, 4]);
