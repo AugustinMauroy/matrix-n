@@ -1,0 +1,10 @@
+{
+  "lcov.path": "coverage.lcov",
+  "lcov.watch": [
+    {
+      "command": "node --run test:coverage",
+      "pattern": "coverage.lcov",
+      "delay": 1000,
+    }
+  ],
+}
