@@ -371,7 +371,7 @@ export class MatrixN {
 		}
 
 		// For larger matrices, use LU decomposition
-		const { L, U } = this.luDecomposition();
+		const { U } = this.luDecomposition();
 		let det = 1;
 		for (let i = 0; i < n; i++) {
 			det *= U.getElement(i, i);
@@ -614,7 +614,7 @@ export class MatrixN {
 	static parse(str: string): MatrixN {
 		const elements = new Float32Array(
 			str
-				.replace(/[\[\]]/g, "") // Remove brackets
+				.replace(/[[\]]/g, "") // Remove brackets
 				.split(",")
 				.map((s) => Number.parseFloat(s.trim())),
 		);
