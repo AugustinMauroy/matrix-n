@@ -307,7 +307,7 @@ export class MatrixN {
 	}
 
 	/**
-	 * Performs an LU decomposition of this matrix (n > 3) using Crout's method.
+	 * Performs an LU decomposition of this square n × n matrix using Crout's method.
 	 * Returns { L, U } where L and U are lower and upper triangular matrices.
 	 */
 	luDecomposition(): { L: MatrixN; U: MatrixN } {
