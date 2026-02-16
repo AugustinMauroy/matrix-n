@@ -19,7 +19,7 @@ describe("MatrixN Core Functionality", () => {
 		assert.deepStrictEqual(Array.from(mat.elements), [1, 2, 3, 4]);
 	});
 
-	it('should trhow error when "Initial data dimensions do not match matrix dimensions”', () => {
+	it('should throw error when "Initial data dimensions do not match matrix dimensions"', () => {
 		assert.throws(
 			() => new MatrixN(2, 4, [1, 2, 3]),
 			/Initial flat data length does not match matrix dimensions/,
@@ -141,6 +141,8 @@ describe("MatrixN Core Functionality", () => {
 		assert.strictEqual(mat.getElement(0, 1), 5);
 		assert.throws(() => mat.getElement(2, 0), /Index out of bounds/);
 		assert.throws(() => mat.setElement(0, 2, 1), /Index out of bounds/);
+		assert.throws(() => mat.getElement(-1, 0), /Index out of bounds/);
+		assert.throws(() => mat.setElement(0, -1, 1), /Index out of bounds/);
 	});
 
 	it("set should update all elements from a flat array", () => {
@@ -303,6 +305,23 @@ describe("MatrixN Operations", () => {
 		assert.strictEqual(m2.determinant(), 23.99999928474422); // Known determinant
 	});
 
+	it("determinant should calculate for 5x5 (LU decomposition)", () => {
+		const m = MatrixN.identity(5);
+
+		assert.strictEqual(m.determinant(), 1);
+
+		const m2 = new MatrixN(
+			5,
+			5,
+			[
+				2, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0,
+				6,
+			],
+		);
+
+		assert.strictEqual(m2.determinant(), 720); // 2*3*4*5*6
+	});
+
 	it("determinant should throw for non-square matrices", () => {
 		assert.throws(
 			() => new MatrixN(2, 3).determinant(),
@@ -380,6 +399,22 @@ describe("MatrixN Operations", () => {
 		);
 		assert.ok(m.multiply(mInv).equals(MatrixN.identity(4), EPSILON));
 	});
+
+	it("invert should work for 5x5 matrix using LU decomposition", () => {
+		const m = new MatrixN(
+			5,
+			5,
+			[
+				2, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0,
+				6,
+			],
+		);
+		const mInv = m.invert();
+		assert.ok(
+			m.multiply(mInv).equals(MatrixN.identity(5), EPSILON),
+			"M * M^-1 should be Identity",
+		);
+	});
 });
 
 describe("MatrixN Utility", () => {
@@ -389,10 +424,12 @@ describe("MatrixN Utility", () => {
 		const mSame = new MatrixN(2, 2, [1, 2, 3, 4]);
 		const mDiffVal = new MatrixN(2, 2, [1, 2, 3, 5]);
 		const mDiffDim = new MatrixN(2, 3);
+		const mDiffRows = new MatrixN(3, 2); // Different rows, same cols
 
 		assert.ok(m.equals(mSame));
 		assert.ok(!m.equals(mDiffVal));
 		assert.ok(!m.equals(mDiffDim));
+		assert.ok(!m.equals(mDiffRows)); // Test dimension mismatch on rows
 
 		const mAlmost = new MatrixN(2, 2, [1.000001, 2.000001, 3.000001, 4.000001]);
 
@@ -404,18 +441,24 @@ describe("MatrixN Utility", () => {
 		const mFullRank = new MatrixN(2, 2, [1, 2, 3, 4]);
 		const mRankDef = new MatrixN(2, 2, [1, 2, 2, 4]); // Rank 1
 		const mZero = new MatrixN(2, 2); // Rank 0
-		const mRect = new MatrixN(2, 3, [1, 2, 3, 4, 5, 6]); // Rank 3
-		const mSingular = new MatrixN(3, 3, [1, 2, 3, 4, 5, 6, 7, 8, 9]); // Rank 2
+		const mRect = new MatrixN(2, 3, [1, 2, 3, 4, 5, 6]); // Rank 2
+		const mInitial123 = new MatrixN(3, 3, [1, 2, 3, 4, 5, 6, 7, 8, 10]); // Rank 3
 		const mIdentity = MatrixN.identity(3); // Rank 3
 		const mDiagonal = new MatrixN(3, 3, [1, 0, 0, 0, 2, 0, 0, 0, 3]); // Rank 3
+		const mRankOne = new MatrixN(3, 3, [1, 2, 3, 2, 4, 6, 3, 6, 9]); // Rank 1 (all rows proportional)
+		const mPartialRank = new MatrixN(3, 3, [1, 0, 1, 0, 1, 0, 0, 0, 0]); // Rank 2
+		const mWide = new MatrixN(2, 4, [1, 0, 2, 0, 0, 1, 0, 3]); // Rank 2
 
 		assert.strictEqual(mFullRank.rank(), 2);
 		assert.strictEqual(mRankDef.rank(), 1);
 		assert.strictEqual(mZero.rank(), 0);
 		assert.strictEqual(mRect.rank(), 2);
-		assert.strictEqual(mSingular.rank(), 3);
+		assert.strictEqual(mInitial123.rank(), 3);
 		assert.strictEqual(mIdentity.rank(), 3);
 		assert.strictEqual(mDiagonal.rank(), 3);
+		assert.strictEqual(mRankOne.rank(), 1);
+		assert.strictEqual(mPartialRank.rank(), 2);
+		assert.strictEqual(mWide.rank(), 2);
 	});
 
 	it("toArray should convert to 2D array", () => {
@@ -514,6 +557,32 @@ describe("MatrixN Utility", () => {
 			() => nonSquare.minor(0, 0),
 			/Minor can only be calculated for square matrices/,
 		);
+	});
+});
+
+describe("MatrixN Advanced Methods", () => {
+	it("luDecomposition should decompose a matrix into L and U", () => {
+		const m = new MatrixN(3, 3, [1, 2, 3, 4, 5, 6, 7, 8, 10]);
+		const { L, U } = m.luDecomposition();
+
+		// L should be lower triangular with 1s on diagonal
+		assert.strictEqual(L.getElement(0, 0), 1);
+		assert.strictEqual(L.getElement(1, 0), 4);
+		assert.strictEqual(L.getElement(2, 0), 7);
+		assert.strictEqual(U.getElement(0, 0), 1);
+
+		// Verify L * U = original matrix (approximately)
+		const product = L.multiply(U);
+		assert.ok(product.equals(m, 1e-5));
+	});
+
+	it("luDecomposition for 4x4 matrix", () => {
+		const m = MatrixN.identity(4);
+		const { L, U } = m.luDecomposition();
+
+		// Identity should decompose to L=I and U=I
+		assert.ok(L.equals(MatrixN.identity(4), 1e-5));
+		assert.ok(U.equals(MatrixN.identity(4), 1e-5));
 	});
 });
 

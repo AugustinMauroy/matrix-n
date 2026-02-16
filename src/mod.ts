@@ -307,13 +307,14 @@ export class MatrixN {
 	}
 
 	/**
-	 * Performs an LU decomposition of this matrix (n > 3) using Crout's method.
+	 * Performs an LU decomposition of this square n × n matrix using Crout's method.
 	 * Returns { L, U } where L and U are lower and upper triangular matrices.
 	 */
-	private luDecomposition(): { L: MatrixN; U: MatrixN } {
+	luDecomposition(): { L: MatrixN; U: MatrixN } {
 		const n = this.rows;
 		const L = MatrixN.identity(n);
 		const U = MatrixN.zeros(n, n);
+
 		for (let j = 0; j < n; j++) {
 			for (let i = 0; i < n; i++) {
 				let sum = 0;
@@ -334,6 +335,7 @@ export class MatrixN {
 				}
 			}
 		}
+
 		return { L, U };
 	}
 
@@ -565,12 +567,14 @@ export class MatrixN {
 	 */
 	toArray(): number[][] {
 		const arr: number[][] = [];
+
 		for (let i = 0; i < this.rows; i++) {
 			arr[i] = [];
 			for (let j = 0; j < this.cols; j++) {
 				arr[i][j] = this.elements[i * this.cols + j];
 			}
 		}
+
 		return arr;
 	}
 
@@ -588,6 +592,7 @@ export class MatrixN {
 	 */
 	toString(): string {
 		let str = "";
+
 		for (let i = 0; i < this.rows; i++) {
 			str += "[";
 			for (let j = 0; j < this.cols; j++) {
@@ -601,6 +606,7 @@ export class MatrixN {
 				str += "\n";
 			}
 		}
+
 		return str;
 	}
 
