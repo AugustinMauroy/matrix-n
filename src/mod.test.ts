@@ -310,13 +310,14 @@ describe("MatrixN Operations", () => {
 
 		assert.strictEqual(m.determinant(), 1);
 
-		const m2 = new MatrixN(5, 5, [
-			2, 0, 0, 0, 0,
-			0, 3, 0, 0, 0,
-			0, 0, 4, 0, 0,
-			0, 0, 0, 5, 0,
-			0, 0, 0, 0, 6,
-		]);
+		const m2 = new MatrixN(
+			5,
+			5,
+			[
+				2, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0,
+				6,
+			],
+		);
 
 		assert.strictEqual(m2.determinant(), 720); // 2*3*4*5*6
 	});
@@ -400,13 +401,14 @@ describe("MatrixN Operations", () => {
 	});
 
 	it("invert should work for 5x5 matrix using LU decomposition", () => {
-		const m = new MatrixN(5, 5, [
-			2, 0, 0, 0, 0,
-			0, 3, 0, 0, 0,
-			0, 0, 4, 0, 0,
-			0, 0, 0, 5, 0,
-			0, 0, 0, 0, 6,
-		]);
+		const m = new MatrixN(
+			5,
+			5,
+			[
+				2, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0,
+				6,
+			],
+		);
 		const mInv = m.invert();
 		assert.ok(
 			m.multiply(mInv).equals(MatrixN.identity(5), EPSILON),
