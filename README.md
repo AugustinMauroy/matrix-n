@@ -12,6 +12,22 @@ A JavaScript library for matrix operations, including addition, multiplication, 
 > This lib is in `0.x.x` version. The API is not definitive and may change in the future. Your feedback is welcome!
 > Please open an issue on [GitHub](https://github.com/AugustinMauroy/matrix-n/issues) if you have any suggestion or if you encounter any issue.
 
+## Performance & Limitations
+
+### Performance Characteristics
+
+- **Matrix Multiplication**: $O(n^3)$ using standard algorithm. For large matrices (n > 1000), consider using specialized libraries like [numeric.js](https://numericjs.org/) or [math.js](https://mathjs.org/).
+- **Determinant Calculation**: Cofactor expansion for matrices ≤ 3×3 ($O(1)$), LU decomposition for larger matrices ($O(n^3)$).
+- **Matrix Inversion**: Uses LU decomposition ($O(n^3)$).
+- **Rank Calculation**: Gaussian elimination ($O(n^3)$).
+
+### Limitations
+
+- **Numerical Stability**: This library uses standard floating-point arithmetic. Large or ill-conditioned matrices may result in numerical instability. For numerical computing, consider [JSMath](https://www.jsmathtools.org/) or [sylvester.js](http://sylvester.jcoglan.com/).
+- **Algorithm Optimization**: No SIMD or GPU acceleration. Not suitable for real-time 3D graphics or scientific computing at scale.
+- **Missing Decompositions**: Does not include QR decomposition, eigenvalue decomposition, or singular value decomposition (SVD).
+- **Precision**: Uses `Float32Array` for storage, limiting precision to ~7 decimal places. For higher precision, use `BigDecimal` libraries.
+
 ## Example
 
 ```typescript
