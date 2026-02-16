@@ -9,7 +9,7 @@ A JavaScript library for matrix operations, including addition, multiplication, 
 > **NOTE** This package is tested with [Node.js](https://nodejs.org/en/) but the package din't use any Node.js specific feature. It should work in any JavaScript environment (browser, Deno, etc.). If you encounter any issue, please open an issue on [GitHub](https://github.com/AugustinMauroy/matrix-n/issues).
 
 > [!NOTE]
-> This lib is in `0.x.x` version. The API is not definitive and may change in the future. Your feedback is welcome!
+> This library is stable as of version `1.0.0` and follows semantic versioning for breaking changes. Your feedback is still welcome!
 > Please open an issue on [GitHub](https://github.com/AugustinMauroy/matrix-n/issues) if you have any suggestion or if you encounter any issue.
 
 ## Performance & Limitations
