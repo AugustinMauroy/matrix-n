@@ -302,7 +302,7 @@ describe("MatrixN Operations", () => {
 			3, 2, 0, 1, 4, 0, 1, 2, 3, 0, 2, 1, 9, 2, 3, 1,
 		]);
 
-		assert.strictEqual(m2.determinant(), 23.99999928474422); // Known determinant
+		assert.ok(Math.abs(m2.determinant() - 24) < EPSILON); // Known determinant
 	});
 
 	it("determinant should calculate for 5x5 (LU decomposition)", () => {
@@ -415,6 +415,30 @@ describe("MatrixN Operations", () => {
 			"M * M^-1 should be Identity",
 		);
 	});
+
+	it("should pivot LU decomposition when a leading pivot is zero", () => {
+		const matrix = MatrixN.fromArray([
+			[0, 1],
+			[1, 0],
+		]);
+		const { L, U, P } = matrix.luDecomposition();
+
+		assert.ok(P.multiply(matrix).equals(L.multiply(U), EPSILON));
+		assert.strictEqual(matrix.determinant(), -1);
+		assert.ok(matrix.invert().equals(matrix, EPSILON));
+	});
+
+	it("should pivot LU decomposition for larger matrices", () => {
+		const matrix = new Mat4([
+			[0, 1, 0, 0],
+			[1, 0, 0, 0],
+			[0, 0, 1, 0],
+			[0, 0, 0, 1],
+		]);
+
+		assert.strictEqual(matrix.determinant(), -1);
+		assert.ok(matrix.multiply(matrix.invert()).equals(MatrixN.identity(4), EPSILON));
+	});
 });
 
 describe("MatrixN Utility", () => {
@@ -493,6 +517,15 @@ describe("MatrixN Utility", () => {
 		assert.strictEqual(parsed.cols, 2);
 	});
 
+	it("parse should round-trip the string representation", () => {
+		const matrix = MatrixN.fromArray([
+			[1, 2],
+			[3, 4],
+		]);
+
+		assert.ok(MatrixN.parse(matrix.toString()).equals(matrix));
+	});
+
 	it("parse should throw on invalid string", () => {
 		const invalidStr = "[1,2,3]";
 
@@ -563,16 +596,13 @@ describe("MatrixN Utility", () => {
 describe("MatrixN Advanced Methods", () => {
 	it("luDecomposition should decompose a matrix into L and U", () => {
 		const m = new MatrixN(3, 3, [1, 2, 3, 4, 5, 6, 7, 8, 10]);
-		const { L, U } = m.luDecomposition();
+		const { L, U, P } = m.luDecomposition();
 
 		// L should be lower triangular with 1s on diagonal
 		assert.strictEqual(L.getElement(0, 0), 1);
-		assert.strictEqual(L.getElement(1, 0), 4);
-		assert.strictEqual(L.getElement(2, 0), 7);
-		assert.strictEqual(U.getElement(0, 0), 1);
 
-		// Verify L * U = original matrix (approximately)
-		const product = L.multiply(U);
+		// Verify P * L * U = original matrix (approximately)
+		const product = P.transpose().multiply(L.multiply(U));
 		assert.ok(product.equals(m, 1e-5));
 	});
 

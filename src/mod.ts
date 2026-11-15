@@ -307,36 +307,60 @@ export class MatrixN {
 	}
 
 	/**
-	 * Performs an LU decomposition of this square n × n matrix using Crout's method.
-	 * Returns { L, U } where L and U are lower and upper triangular matrices.
+	 * Performs an LU decomposition of this square n × n matrix using Crout's method
+	 * with partial pivoting. Returns { L, U, P } where P * this = L * U.
 	 */
-	luDecomposition(): { L: MatrixN; U: MatrixN } {
+	luDecomposition(): { L: MatrixN; U: MatrixN; P: MatrixN } {
 		const n = this.rows;
 		const L = MatrixN.identity(n);
-		const U = MatrixN.zeros(n, n);
+		const U = this.clone();
+		const P = MatrixN.identity(n);
 
 		for (let j = 0; j < n; j++) {
-			for (let i = 0; i < n; i++) {
-				let sum = 0;
-				if (i <= j) {
-					for (let k = 0; k < i; k++) {
-						sum += L.getElement(i, k) * U.getElement(k, j);
-					}
-					U.setElement(i, j, this.getElement(i, j) - sum);
-				} else {
-					for (let k = 0; k < j; k++) {
-						sum += L.getElement(i, k) * U.getElement(k, j);
-					}
-					L.setElement(
+			let pivot = j;
+			for (let i = j + 1; i < n; i++) {
+				if (
+					Math.abs(U.getElement(i, j)) >
+					Math.abs(U.getElement(pivot, j))
+				) {
+					pivot = i;
+				}
+			}
+
+			if (pivot !== j) {
+				for (let k = 0; k < n; k++) {
+					const u = U.getElement(j, k);
+					U.setElement(j, k, U.getElement(pivot, k));
+					U.setElement(pivot, k, u);
+
+					const p = P.getElement(j, k);
+					P.setElement(j, k, P.getElement(pivot, k));
+					P.setElement(pivot, k, p);
+				}
+				for (let k = 0; k < j; k++) {
+					const l = L.getElement(j, k);
+					L.setElement(j, k, L.getElement(pivot, k));
+					L.setElement(pivot, k, l);
+				}
+			}
+
+			const pivotValue = U.getElement(j, j);
+			if (pivotValue === 0) continue;
+
+			for (let i = j + 1; i < n; i++) {
+				const factor = U.getElement(i, j) / pivotValue;
+				L.setElement(i, j, factor);
+				for (let k = j; k < n; k++) {
+					U.setElement(
 						i,
-						j,
-						(this.getElement(i, j) - sum) / U.getElement(j, j),
+						k,
+						U.getElement(i, k) - factor * U.getElement(j, k),
 					);
 				}
 			}
 		}
 
-		return { L, U };
+		return { L, U, P };
 	}
 
 	/**
@@ -373,12 +397,28 @@ export class MatrixN {
 		}
 
 		// For larger matrices, use LU decomposition
-		const { U } = this.luDecomposition();
+		const { U, P } = this.luDecomposition();
 		let det = 1;
 		for (let i = 0; i < n; i++) {
 			det *= U.getElement(i, i);
 		}
-		return det;
+		let inversions = 0;
+		const permutation: number[] = [];
+		for (let i = 0; i < n; i++) {
+			permutation.push(
+				Array.from({ length: n }, (_, j) => j).find(
+					(j) => P.getElement(i, j) === 1,
+				) ?? -1,
+			);
+		}
+		for (let i = 0; i < n; i++) {
+			for (let j = i + 1; j < n; j++) {
+				if (permutation[i] > permutation[j]) {
+					inversions++;
+				}
+			}
+		}
+		return det * (inversions % 2 === 0 ? 1 : -1);
 	}
 
 	/**
@@ -457,9 +497,9 @@ export class MatrixN {
 		}
 
 		// Inversion by LU for n > 3
-		const { L, U } = this.luDecomposition();
+		const { L, U, P } = this.luDecomposition();
 		// Forward and backward substitutions to find inverse
-		const inv = MatrixN.identity(n);
+		const inv = P.clone();
 		for (let col = 0; col < n; col++) {
 			// Solve L * y = e (where e is a unit vector) for y
 			for (let i = 0; i < n; i++) {
@@ -475,7 +515,13 @@ export class MatrixN {
 				for (let k = i + 1; k < n; k++) {
 					sum -= U.getElement(i, k) * inv.getElement(k, col);
 				}
-				inv.setElement(i, col, sum / U.getElement(i, i));
+				const pivot = U.getElement(i, i);
+				if (pivot === 0) {
+					throw new Error(
+						"Matrix is singular and cannot be inverted (zero pivot).",
+					);
+				}
+				inv.setElement(i, col, sum / pivot);
 			}
 		}
 		return inv;
@@ -618,17 +664,33 @@ export class MatrixN {
 	 * const mat = MatrixN.parse("[1, 2, 3, 4]");
 	 */
 	static parse(str: string): MatrixN {
-		const elements = new Float32Array(
-			str
-				.replace(/[[\]]/g, "") // Remove brackets
-				.split(",")
-				.map((s) => Number.parseFloat(s.trim())),
+		const rows = [...str.matchAll(/\[([^\]]*)\]/g)].map((match) =>
+			match[1].split(",").map((value) => Number(value.trim())),
 		);
-		const size = Math.sqrt(elements.length);
-		if (!Number.isInteger(size)) {
+		if (
+			rows.length === 0 ||
+			rows.some(
+				(row) =>
+					row.length === 0 ||
+					row.some((value) => !Number.isFinite(value)),
+			)
+		) {
 			throw new Error("Input string does not represent a square matrix.");
 		}
-		return new MatrixN(size, size, Array.from(elements));
+
+		if (rows.length === 1) {
+			const size = Math.sqrt(rows[0].length);
+			if (!Number.isInteger(size)) {
+				throw new Error("Input string does not represent a square matrix.");
+			}
+			return new MatrixN(size, size, rows[0]);
+		}
+
+		const size = rows.length;
+		if (rows.some((row) => row.length !== size)) {
+			throw new Error("Input string does not represent a square matrix.");
+		}
+		return new MatrixN(size, size, rows.flat());
 	}
 
 	/**
