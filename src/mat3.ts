@@ -1,3 +1,5 @@
+/* @ts-self-types="./mat3.ts" */
+
 import { MatrixN } from "./matrix-n.ts";
 
 /**

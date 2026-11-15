@@ -719,13 +719,3 @@ export class MatrixN {
 		return new MatrixN(json.rows, json.cols, json.elements);
 	}
 }
-
-// --- Fixed Size Matrix Classes (Mat2, Mat3, Mat4) ---
-// These can be implemented as classes that extend MatrixN or as standalone
-// classes with optimized operations if needed. For simplicity, they are shown
-// here as type aliases and static methods for construction, relying on MatrixN
-// for operations. A more optimized library might have dedicated implementations.
-
-/**
- * Represents a 2x2 Matrix. Extends MatrixN.
- */
