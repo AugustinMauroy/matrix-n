@@ -7,11 +7,11 @@
   },
   "assist": {
     "actions": {
-      "source": { "organizeImports": "off" }
+      "preset": "recommended"
     }
   },
   "files": {
-    "includes": ["**/*.js", "**/*.ts", "**/*.json"]
+    "includes": ["**/*.js", "**/*.ts", "**/*.json", "**/*.md", "!dist"]
   },
   "formatter": {
     "enabled": true,
@@ -20,37 +20,27 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
-      "complexity": {
-        "noStaticOnlyClass": "warn"
-      },
-      "style": {
-        "noParameterAssign": "error",
-        "useAsConstAssertion": "error",
-        "useDefaultParameterLast": "error",
-        "useEnumInitializers": "error",
-        "useSelfClosingElements": "error",
-        "useSingleVarDeclarator": "error",
-        "noUnusedTemplateLiteral": "error",
-        "useNumberNamespace": "error",
-        "noInferrableTypes": "error",
-        "noUselessElse": "error"
-      },
-      "correctness": {
-        "noUnusedImports": "off"
-      },
-      "performance": {
-        "noDynamicNamespaceImportAccess": "off"
-      }
+      "preset": "recommended"
     }
   },
   "javascript": {
     "formatter": {
-      "quoteStyle": "double"
+      "enabled": true
+    },
+    "linter": {
+      "enabled": true
     }
   },
   "json": {
     "formatter": {
+      "enabled": true
+    }
+  },
+  "markdown": {
+    "formatter": {
+      "enabled": true
+    },
+    "linter": {
       "enabled": true
     }
   }
